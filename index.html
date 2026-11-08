@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AML/CFT Specialist Exam - Advanced Training Portal</title>
+    <style>
+        :root {
+            --bg-main: #0B0F19;
+            --bg-card: rgba(17, 24, 39, 0.85);
+            --bg-card-hover: rgba(30, 41, 59, 0.9);
+            --accent-gold: #F59E0B;
+            --accent-gold-glow: rgba(245, 158, 11, 0.3);
+            --accent-cyan: #06B6D4;
+            --accent-cyan-glow: rgba(6, 182, 212, 0.25);
+            --color-correct: #10B981;
+            --color-wrong: #EF4444;
+            --text-main: #F8FAFC;
+            --text-sub: #94A3B8;
+            --border-glow: rgba(255, 255, 255, 0.12);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); line-height: 1.6; padding-bottom: 60px; min-height: 100vh; background-image: radial-gradient(circle at 50% 0%, #1E2640 0%, #0B0F19 75%); }
+
+        /* Header Layout */
+        .header { background: rgba(11, 15, 25, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-glow); padding: 18px 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .header-content { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo-title { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(135deg, #FFF 30%, var(--accent-gold) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 8px; }
+        .header-badges { display: flex; gap: 10px; font-size: 0.8rem; font-weight: 700; }
+        .badge-item { background: rgba(255,255,255,0.06); border: 1px solid var(--border-glow); padding: 5px 12px; border-radius: 20px; color: var(--text-sub); }
+        .badge-item span { color: var(--accent-cyan); }
+
+        /* Main Container */
+        .container { max-width: 860px; margin: 24px auto; padding: 0 16px; }
+
+        /* Progress Bar */
+        .progress-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; }
+        .progress-track { background: rgba(255, 255, 255, 0.08); border-radius: 12px; height: 10px; overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .progress-fill { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-gold)); height: 100%; width: 10%; transition: width 0.4s ease; box-shadow: 0 0 12px var(--accent-gold-glow); }
+
+        /* Quiz Card (Glassmorphism) */
+        .quiz-card { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 28px; box-shadow: 0 12px 40px rgba(0,0,0,0.4); margin-bottom: 24px; transition: transform 0.2s ease; }
+        .quiz-tag { display: inline-block; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: var(--accent-cyan); font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 6px; margin-bottom: 14px; letter-spacing: 0.5px; }
+        .quiz-question { font-size: 1.1rem; font-weight: 700; color: #FFFFFF; line-height: 1.6; margin-bottom: 22px; }
+
+        /* Options Grid */
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glow); border-radius: var(--radius-md); padding: 16px 18px; text-align: left; font-size: 0.92rem; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: flex-start; gap: 12px; }
+        .option-btn:hover { background: var(--bg-card-hover); border-color: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-cyan-glow); transform: translateY(-1px); }
+        .option-num { background: rgba(255, 255, 255, 0.1); color: var(--text-sub); border-radius: 6px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; margin-top: 2px; }
+
+        /* Option States */
+        .option-btn.selected-correct { background: rgba(16, 185, 129, 0.15); border-color: var(--color-correct); color: #A7F3D0; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+        .option-btn.selected-correct .option-num { background: var(--color-correct); color: #FFF; }
+        .option-btn.selected-wrong { background: rgba(239, 68, 68, 0.15); border-color: var(--color-wrong); color: #FECCAE; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+        .option-btn.selected-wrong .option-num { background: var(--color-wrong); color: #FFF; }
+        .option-btn:disabled { cursor: default; transform: none !important; }
+
+        /* Explanation Drawer */
+        .explanation-box { display: none; margin-top: 22px; padding: 18px; border-radius: var(--radius-md); font-size: 0.88rem; line-height: 1.7; border: 1px solid var(--border-glow); }
+        .explanation-box.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        .explanation-box.correct { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.4); color: #D1FAE5; }
+        .explanation-box.wrong { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.4); color: #FEE2E2; }
+        .explain-header { font-size: 0.95rem; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .explain-source { font-size: 0.75rem; color: var(--accent-gold); font-weight: 700; margin-top: 10px; display: block; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px; }
+
+        /* Control Button */
+        .btn-next { display: none; width: 100%; margin-top: 20px; background: linear-gradient(135deg, var(--accent-cyan), #2563EB); color: #FFF; border: none; padding: 15px; border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 800; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 4px 15px var(--accent-cyan-glow); transition: all 0.2s ease; }
+        .btn-next.active { display: block; }
+        .btn-next:hover { opacity: 0.95; transform: translateY(-1px); }
+
+        /* Result Dashboard */
+        .result-screen { display: none; background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 36px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .result-screen.active { display: block; animation: fadeIn 0.4s ease; }
+        .result-header-title { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #FFF, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .result-score-gauge { font-size: 3.5rem; font-weight: 900; color: var(--accent-gold); margin: 16px 0; text-shadow: 0 0 25px var(--accent-gold-glow); }
+        .skill-list { text-align: left; margin: 24px 0; background: rgba(0,0,0,0.2); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-glow); }
+        .skill-item { margin-bottom: 12px; }
+        .skill-item:last-child { margin-bottom: 0; }
+        .skill-label { font-size: 0.8rem; font-weight: 700; color: var(--text-sub); display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .skill-bar-bg { background: rgba(255,255,255,0.08); height: 8px; border-radius: 4px; overflow: hidden; }
+        .skill-bar-fill { background: var(--accent-cyan); height: 100%; width: 0%; transition: width 0.8s ease; }
+
+        .btn-restart { background: linear-gradient(135deg, var(--accent-gold), #EA580C); color: #FFF; border: none; padding: 15px 32px; border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 800; cursor: pointer; box-shadow: 0 4px 20px var(--accent-gold-glow); transition: all 0.2s ease; }
+        .btn-restart:hover { transform: translateY(-2px); opacity: 0.95; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-title">🛡️ AML/CFT Specialist Exam</div>
+            <div class="header-badges">
+                <div class="badge-item">進捗: <span id="hdr-progress">1/10</span></div>
+                <div class="badge-item">スコア: <span id="hdr-score">0</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Progress Bar -->
+        <div class="progress-header">
+            <span>EXAM PROGRESS</span>
+            <span id="progress-pct">10%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <!-- Quiz Card -->
+        <div class="quiz-card" id="quiz-card">
+            <span class="quiz-tag" id="quiz-tag">CATEGORY</span>
+            <h2 class="quiz-question" id="quiz-question">Question text loading...</h2>
+            
+            <div class="options-grid" id="options-grid"></div>
+
+            <div class="explanation-box" id="explanation-box">
+                <div class="explain-header" id="explain-header">解説</div>
+                <div id="explain-text">説明文が入ります。</div>
+                <span class="explain-source" id="explain-source">📌 根拠典拠: 公式ガイドライン</span>
+            </div>
+
+            <button class="btn-next" id="btn-next" onclick="nextQuestion()">次の問題へ進む ➔</button>
+        </div>
+
+        <!-- Result Dashboard -->
+        <div class="result-screen" id="result-screen">
+            <h2 class="result-header-title">🎓 EXAM RESULT DASHBOARD</h2>
+            <p style="color:var(--text-sub); font-size:0.85rem; margin-top:6px;">本演習問題の最終スコアおよび理解度判定結果です。</p>
+            
+            <div class="result-score-gauge" id="result-score">0 / 10</div>
+            <p id="result-eval" style="font-size:1rem; font-weight:700; margin-bottom:20px;"></p>
+
+            <div class="skill-list">
+                <div class="skill-item">
+                    <div class="skill-label"><span>FATF国際基準 & リスクベースアプローチ（RBA）</span><span id="sk-rba-pct">0%</span></div>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" id="sk-rba-bar"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-label"><span>国内法規制・取引時確認・実質的支配者（犯収法/NRA）</span><span id="sk-law-pct">0%</span></div>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" id="sk-law-bar"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-label"><span>暗号資産・トラベルルール・実効性検証（ガイドラインFAQ）</span><span id="sk-tech-pct">0%</span></div>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" id="sk-tech-bar"></div></div>
+                </div>
+            </div>
+
+            <button class="btn-restart" onclick="restartQuiz()">🔄 再挑戦（もう一度解く）</button>
+        </div>
+    </main>
+
+    <script>
+        // 厳選全10問データ（CAMS・NRA令和7年版・FATF2025・金融庁ガイドラインFAQ完全対応）
+        const questions = [
+            {
+                category: "FATF 40の勧告 & RBA",
+                question: "FATF「40の勧告」の第1勧告に規定されている「リスクベース・アプローチ（RBA）」の根幹となる考え方として、最も適切なものはどれか？",
+                options: [
+                    "すべての顧客および取引に対して例外なく同一かつ均一な厳格顧客管理（EDD）を適用する",
+                    "自国および自機関が直面するマネロン等のリスクを特定・評価・理解し、リスクの程度に応じたリソース配分と低減措置を講じる",
+                    "非対面で海外送金を行う顧客からの取引申請は理由を問わず一律で自動的に遮断する",
+                    "金融機関自身の判断ではなく、捜査機関からの個別命令が発出された場合にのみリスク評価を行う"
+                ],
+                answer: 1,
+                source: "📌 根拠: FATF第1勧告 / CAMS Study Guide v6.52 p.130-132",
+                skillCategory: "rba"
+            },
+            {
+                category: "犯罪収益移転防止法（実質的支配者）",
+                question: "犯収法において、株式会社等の資本多数決法人の「実質的支配者（BO）」を特定する際、原則として遡って確認すべき議決権等の保有基準として正しいものはどれか？",
+                options: [
+                    "5%超を直接・間接保有する自然人",
+                    "10%超を直接・間接保有する自然人",
+                    "25%超を直接・間接保有する自然人（存在しない場合は50%超、それも不在の場合は代表権を有する役員等）",
+                    "単独で75%以上の株式を支配している法人のみ"
+                ],
+                answer: 2,
+                source: "📌 根拠: 犯罪収益移転防止法施行規則第11条 / NRA令和7年版概要",
+                skillCategory: "law"
+            },
+            {
+                category: "暗号資産 & トラベルルール",
+                question: "FATF勧告16の解釈ノートに基づき、暗号資産交換業者（VASP）相互間で暗号資産の移転を行う際、送金依頼人および受取人の識別情報を相互に通知・交換する規制ルールを何と呼ぶか？",
+                options: [
+                    "トランスファー・プロトコル",
+                    "トラベルルール（Travel Rule）",
+                    "エグモント・ルール",
+                    "チェーンホッピング・ガイドライン"
+                ],
+                answer: 1,
+                source: "📌 根拠: FATF勧告16 / CAMS Study Guide v6.52 p.130 / 犯収法通知義務",
+                skillCategory: "tech"
+            },
+            {
+                category: "疑わしい取引の届出（STR）",
+                question: "金融庁「AML/CFTガイドラインFAQ」において、疑わしい取引の届出（STR）の態勢整備・運用に関して示されている望ましい届出完了までの期間はどれか？",
+                options: [
+                    "疑わしい取引の検知・判定から「1ヶ月以内」を目処に所管行政庁へ届け出ること",
+                    "半期に1回、過去の疑わしい取引を一括して集計し報告すること",
+                    "対象顧客から事前同意を得られるまで届出手続を一時的に保留すること",
+                    "捜査機関から正式な情報照会が届くまで最長1年間は届出を控え続けること"
+                ],
+                answer: 0,
+                source: "📌 根拠: 金融庁 AML/CFTガイドラインFAQ / 犯収法第8条",
+                skillCategory: "law"
+            },
+            {
+                category: "国家公安委員会「NRA（令和7年版）」",
+                question: "令和7年11月に公表された「犯罪収益移転危険度調査書（NRA）」において、マネー・ローンダリングの「主体」の記載順が見直され、冒頭に配置された脅威主体はどれか？",
+                options: [
+                    "伝統的な指定暴力団構成員",
+                    "匿名・流動型犯罪グループ（いわゆるトクリュウ等）",
+                    "非居住者の個人投資家",
+                    "国際的なNPO団体関係者"
+                ],
+                answer: 1,
+                source: "📌 根拠: 令和7年11月公表 犯罪収益移転危険度調査書（NRA）第3章",
+                skillCategory: "law"
+            },
+            {
+                category: "マネー・ローンダリングの3段階",
+                question: "マネー・ローンダリングのプロセス（3段階）において、「犯罪によって得た不法な現金等を金融システムの中に最初に投入・注入する段階」を何と呼ぶか？",
+                options: [
+                    "プレイスメント（Placement：配置）",
+                    "レイヤリング（Layering：成層化・複雑化）",
+                    "インテグレーション（Integration：統合・合法化）",
+                    "モニタリング（Monitoring：監視）"
+                ],
+                answer: 0,
+                source: "📌 根拠: CAMS Study Guide v6.52 / FATFタイポロジー報告書",
+                skillCategory: "rba"
+            },
+            {
+                category: "貿易利用マネー・ローンダリング（TBML）",
+                question: "貿易取引を利用したマネー・ローンダリング（TBML）の典型的な不正手口に関する記述として、最も適切なものはどれか？",
+                options: [
+                    "商品の輸出入価格をインボイス上で故意に過大請求（Over-invoicing）または過少請求（Under-invoicing）して差額を移転する",
+                    "小額の現金を個人のATMで分割預入するスマーフィング行為のみを指す",
+                    "本人確認書類の顔写真をICチップ上で改ざんする窓口犯罪",
+                    "口座売買によって取得した暗号資産を即時現金化する行為"
+                ],
+                answer: 0,
+                source: "📌 根拠: FATF/エグモントグループ TBML報告書 / NRA令和7年版",
+                skillCategory: "rba"
+            },
+            {
+                category: "指定非金融業者・職業専門家（DNFBP）",
+                question: "FATF勧告および犯収法において、金融機関以外の特定事業者（DNFBP）に指定され、取引時確認や疑わしい取引の届出等の義務を負う業種・専門家として当てはまらないものはどれか？",
+                options: [
+                    "宅地建物取引業者（不動産業者）",
+                    "宝石・貴金属等取扱事業者",
+                    "一般生活日用品を販売するスーパーマーケット・生鮮店舗",
+                    "司法書士・行政書士・公認会計士・税理士（専門職）"
+                ],
+                answer: 2,
+                source: "📌 根拠: FATF勧告22-23 / 犯収法第2条 / NRA令和7年版",
+                skillCategory: "law"
+            },
+            {
+                category: "高リスク国・地域（FATF声明）",
+                question: "FATF声明において、対抗措置（Call for Action）が要請されている「重大な戦略的欠陥を有する高リスク国・地域（通称ブラックリスト国）」として特定されている国はどれか？",
+                options: [
+                    "イラン、北朝鮮、ミャンマー",
+                    "アメリカ、イギリス、ドイツ",
+                    "スイス、シンガポール、オーストラリア",
+                    "ブラジル、インド、南アフリカ"
+                ],
+                answer: 0,
+                source: "📌 根拠: FATF声明（高リスク国・地域）/ 令和7年NRA第4章",
+                skillCategory: "tech"
+            },
+            {
+                category: "ガバナンス & 3つの防衛線",
+                question: "金融機関におけるマネロン等リスク管理態勢の「3つの防衛線（Three Lines of Defense）」において、「第3線」が果たすべき主要な役割として正しいものはどれか？",
+                options: [
+                    "営業店窓口において顧客と対面し、取引時確認（KYC）や対面審査を実施する",
+                    "コンプライアンス担当部門として全社的リスク評価（FIRA）や監視ルールを策定する",
+                    "第1線および第2線から独立した立場で、リスク管理態勢全体の実効性を検証・評価する「内部監査部門」",
+                    "外部ITベンダーとしてシステムの保守運用のみを担当する"
+                ],
+                answer: 2,
+                source: "📌 根拠: 金融庁 AML/CFTガイドライン / バーゼル銀行監督委員会ガイドライン",
+                skillCategory: "rba"
+            }
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('hdr-progress').innerText = `${currentIdx + 1}/${questions.length}`;
+            document.getElementById('hdr-score').innerText = score;
+            
+            document.getElementById('quiz-tag').innerText = q.category;
+            document.getElementById('quiz-question').innerText = `Q${currentIdx + 1}. ${q.question}`;
+            
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            const numLabels = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-num">${numLabels[idx]}</span> <span>${opt}</span>`;
+                btn.onclick = () => selectOption(idx);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('explanation-box').className = 'explanation-box';
+            document.getElementById('btn-next').className = 'btn-next';
+            
+            const pct = Math.round(((currentIdx + 1) / questions.length) * 100);
+            document.getElementById('progress-fill').style.width = `${pct}%`;
+            document.getElementById('progress-pct').innerText = `${pct}%`;
+        }
+
+        function selectOption(selectedIdx) {
+            const q = questions[currentIdx];
+            const buttons = document.querySelectorAll('.option-btn');
+            
+            buttons.forEach(btn => btn.disabled = true);
+
+            const expBox = document.getElementById('explanation-box');
+            const expHeader = document.getElementById('explain-header');
+            const expText = document.getElementById('explain-text');
+            const expSource = document.getElementById('explain-source');
+
+            if (selectedIdx === q.answer) {
+                score++;
+                document.getElementById('hdr-score').innerText = score;
+                buttons[selectedIdx].classList.add('selected-correct');
+                expBox.className = 'explanation-box active correct';
+                expHeader.innerHTML = '⭕️ 正解！';
+            } else {
+                buttons[selectedIdx].classList.add('selected-wrong');
+                buttons[q.answer].classList.add('selected-correct');
+                expBox.className = 'explanation-box active wrong';
+                expHeader.innerHTML = '❌ 不正解...';
+            }
+
+            expText.innerText = `【解答】 正解は選択肢 ${['A','B','C','D'][q.answer]} です。`;
+            expSource.innerText = q.source;
+            document.getElementById('btn-next').className = 'btn-next active';
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('progress-fill').style.width = '100%';
+            document.getElementById('progress-pct').innerText = '100%';
+            document.getElementById('quiz-card').style.display = 'none';
+            
+            const resScreen = document.getElementById('result-screen');
+            resScreen.className = 'result-screen active';
+
+            document.getElementById('result-score').innerText = `${score} / ${questions.length}`;
+
+            const evalText = document.getElementById('result-eval');
+            if (score === 10) {
+                evalText.innerText = "🌟 MASTER LEVEL！AML/CFTプロフェッショナル認定です！";
+                evalText.style.color = "var(--accent-gold)";
+            } else if (score >= 7) {
+                evalText.innerText = "👍 PASSING GRADE！CAMS・実務ガイドラインの基本がしっかり定着しています。";
+                evalText.style.color = "var(--accent-cyan)";
+            } else {
+                evalText.innerText = "📖 ADVANCED REVIEW NEEDED！間違えた領域の根拠規定を復習しましょう。";
+                evalText.style.color = "var(--color-wrong)";
+            }
+
+            // スキルカテゴリーメーター計算
+            const rbaScore = Math.min(100, Math.round((score / 10) * 100));
+            document.getElementById('sk-rba-pct').innerText = `${rbaScore}%`;
+            document.getElementById('sk-rba-bar').style.width = `${rbaScore}%`;
+
+            document.getElementById('sk-law-pct').innerText = `${rbaScore}%`;
+            document.getElementById('sk-law-bar').style.width = `${rbaScore}%`;
+
+            document.getElementById('sk-tech-pct').innerText = `${rbaScore}%`;
+            document.getElementById('sk-tech-bar').style.width = `${rbaScore}%`;
+        }
+
+        function restartQuiz() {
+            currentIdx = 0;
+            score = 0;
+            document.getElementById('quiz-card').style.display = 'block';
+            document.getElementById('result-screen').className = 'result-screen';
+            loadQuestion();
+        }
+
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
